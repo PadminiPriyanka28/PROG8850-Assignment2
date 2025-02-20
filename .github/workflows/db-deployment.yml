@@ -1,0 +1,31 @@
+name: CI/CD for Azure MySQL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install MySQL Connector
+        run: pip install mysql-connector-python
+
+      - name: Execute SQL Scripts
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        run: |
+          python execute_sql.py
