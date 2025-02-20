@@ -3,7 +3,7 @@ name: CI/CD Pipeline for MySQL Database Deployment
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
   deploy:
@@ -25,8 +25,8 @@ jobs:
 
     - name: Run SQL Script
       env:
-        MYSQL_HOST: ${{ secrets.MYSQL_HOST }}      # Set your Azure MySQL host
+        MYSQL_HOST: ${{ secrets.MYSQL_HOST }}      # Azure MySQL host
         MYSQL_USER: ${{ secrets.MYSQL_USER }}      # MySQL Username (e.g., mysqladmin)
         MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}  # MySQL Password
-        MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}  # Database Name (e.g., assignment2)
+        MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}  # Database Name (e.g., companydb)
       run: python execution.py
