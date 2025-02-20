@@ -9,7 +9,7 @@ db_config = {
     "database": os.getenv("MYSQL_DATABASE")  # MySQL database name
 }
 
-def execute_sql_script():
+def execution_script():
     try:
         # Attempt to connect to the database
         conn = mysql.connector.connect(**db_config)
@@ -36,4 +36,4 @@ def execute_sql_script():
             conn.close()
 
 if __name__ == "__main__":
-    execute_sql_script()
+    execution_script()
