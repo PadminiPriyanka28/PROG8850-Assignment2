@@ -13,6 +13,8 @@ sql_file_path = 'schema.sql'
 
 def execute_sql_script():
     """Connect to the MySQL database and execute the SQL script."""
+    connection = None  # Initialize connection variable
+    
     try:
         # Establishing a connection to the database
         connection = mysql.connector.connect(
@@ -36,7 +38,7 @@ def execute_sql_script():
     except Error as e:
         print(f"Error: {e}")
     finally:
-        if connection.is_connected():
+        if connection and connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL connection closed.")
