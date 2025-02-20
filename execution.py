@@ -1,39 +1,45 @@
-import mysql.connector
 import os
+import mysql.connector
+from mysql.connector import Error
 
-# Database connection details (use GitHub Secrets)
-db_config = {
-    "host": os.getenv("MYSQL_HOST"),         # Azure MySQL host
-    "user": os.getenv("MYSQL_USER"),         # MySQL username
-    "password": os.getenv("MYSQL_PASSWORD"), # MySQL password
-    "database": os.getenv("MYSQL_DATABASE")  # MySQL database name
-}
+# Fetch MySQL credentials from environment variables
+host = os.getenv('MYSQL_HOST')
+user = os.getenv('MYSQL_USER')
+password = os.getenv('MYSQL_PASSWORD')
+database = os.getenv('MYSQL_DATABASE')
 
-def execution_script():
+# Define the path to the SQL file
+sql_file_path = 'schema.sql'
+
+def execute_sql_script():
+    """Connect to the MySQL database and execute the SQL script."""
     try:
-        # Attempt to connect to the database
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-        print("Connected to MySQL successfully!")
+        # Establishing a connection to the database
+        connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
 
-        # Example SQL execution (Change this to your desired script)
-        cursor.execute("SELECT NOW();")
-        result = cursor.fetchone()
-        print(f"Current MySQL time: {result}")
+        if connection.is_connected():
+            print(f"Connected to the database {database} at {host}")
+            cursor = connection.cursor()
 
-        # You can add other SQL commands here
+            # Read and execute the SQL script from the file
+            with open(sql_file_path, 'r') as file:
+                sql_script = file.read()
+                cursor.execute(sql_script, multi=True)  # Execute multi-statements from file
+                connection.commit()
+                print("SQL script executed successfully.")
 
-        # Commit the changes
-        conn.commit()
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
+    except Error as e:
+        print(f"Error: {e}")
     finally:
-        # Always close the connection
-        if cursor:
+        if connection.is_connected():
             cursor.close()
-        if conn:
-            conn.close()
+            connection.close()
+            print("MySQL connection closed.")
 
-if __name__ == "__main__":
-    execution_script()
+# Run the SQL script
+execute_sql_script()
