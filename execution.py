@@ -1,47 +1,30 @@
-import os
-import mysql.connector
-from mysql.connector import Error
+name: CI/CD Pipeline for MySQL Database Deployment
 
-# Fetch MySQL credentials from environment variables
-host = os.getenv('MYSQL_HOST')
-user = os.getenv('MYSQL_USER')
-password = os.getenv('MYSQL_PASSWORD')
-database = os.getenv('MYSQL_DATABASE')
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
 
-# Define the path to the SQL file
-sql_file_path = 'schema.sql'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-def execute_sql_script():
-    """Connect to the MySQL database and execute the SQL script."""
-    connection = None  # Initialize connection variable
-    
-    try:
-        # Establishing a connection to the database
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-        if connection.is_connected():
-            print(f"Connected to the database {database} at {host}")
-            cursor = connection.cursor()
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
-            # Read and execute the SQL script from the file
-            with open(sql_file_path, 'r') as file:
-                sql_script = file.read()
-                cursor.execute(sql_script, multi=True)  # Execute multi-statements from file
-                connection.commit()
-                print("SQL script executed successfully.")
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install mysql-connector-python
 
-    except Error as e:
-        print(f"Error: {e}")
-    finally:
-        if connection and connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("MySQL connection closed.")
-
-# Run the SQL script
-execute_sql_script()
+    - name: Run SQL Script
+      env:
+        MYSQL_HOST: ${{ secrets.MYSQL_HOST }}      # Azure MySQL host
+        MYSQL_USER: ${{ secrets.MYSQL_USER }}      # MySQL Username (e.g., mysqladmin)
+        MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}  # MySQL 
