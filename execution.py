@@ -1,41 +1,39 @@
 import mysql.connector
 import os
 
-# Get MySQL credentials from GitHub Secrets
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+# Database connection details (use GitHub Secrets)
+db_config = {
+    "host": os.getenv("MYSQL_HOST"),         # Azure MySQL host
+    "user": os.getenv("MYSQL_USER"),         # MySQL username
+    "password": os.getenv("MYSQL_PASSWORD"), # MySQL password
+    "database": os.getenv("MYSQL_DATABASE")  # MySQL database name
+}
 
 def execute_sql_script():
     try:
-        # Connect to MySQL
-        connection = mysql.connector.connect(
-            host=MYSQL_HOST,
-            user=MYSQL_USER,
-            password=MYSQL_PASSWORD,
-            database=MYSQL_DATABASE
-        )
-        cursor = connection.cursor()
+        # Attempt to connect to the database
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        print("Connected to MySQL successfully!")
 
-        # Read and execute SQL file
-        with open("schema.sql", "r") as file:
-            sql_script = file.read()
-            for statement in sql_script.split(";"):
-                if statement.strip():
-                    cursor.execute(statement)
+        # Example SQL execution (Change this to your desired script)
+        cursor.execute("SELECT NOW();")
+        result = cursor.fetchone()
+        print(f"Current MySQL time: {result}")
 
-        connection.commit()
-        print("Database changes applied successfully.")
+        # You can add other SQL commands here
+
+        # Commit the changes
+        conn.commit()
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-
     finally:
+        # Always close the connection
         if cursor:
             cursor.close()
-        if connection:
-            connection.close()
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
     execute_sql_script()
